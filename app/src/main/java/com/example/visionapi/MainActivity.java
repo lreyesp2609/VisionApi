@@ -17,6 +17,9 @@ import android.Manifest;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.visionapi.ml.Modeloflowers;
+import com.example.visionapi.ml.Roostros;
+import com.example.visionapi.ml.Rostros;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.vision.common.InputImage;
@@ -30,12 +33,18 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
+
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 public class MainActivity extends AppCompatActivity
         implements OnSuccessListener<Text>, OnFailureListener {
@@ -178,5 +187,51 @@ public class MainActivity extends AppCompatActivity
                    txtResults.setText(resultados);               }
            })
                 .addOnFailureListener(this);
+    }
+
+    public ByteBuffer convertirImagenATensorBuffer(Bitmap mSelectedImage){
+        Bitmap imagen = Bitmap.createScaledBitmap(mSelectedImage, 224, 224, true);
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * 224 * 224 * 3);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        int[] intValues = new int[224 * 224];
+        imagen.getPixels(intValues, 0, imagen.getWidth(), 0, 0, imagen.getWidth(), imagen.getHeight());
+        int pixel = 0;
+        for(int i = 0; i < imagen.getHeight(); i ++){
+            for(int j = 0; j < imagen.getWidth(); j++){
+                int val = intValues[pixel++]; // RGB
+                byteBuffer.putFloat(((val >> 16) & 0xFF) * (1.f / 255.f));
+                byteBuffer.putFloat(((val >> 8) & 0xFF) * (1.f / 255.f));
+                byteBuffer.putFloat((val & 0xFF) * (1.f / 255.f));
+            }
+        }
+        return byteBuffer;
+    }
+
+    public String obtenerEtiquetayProbabilidad(String[] etiquetas, float[] probabilidades){
+        float valorMayor=Float.MIN_VALUE;
+        int pos=-1;
+        for (int i = 0; i < probabilidades.length; i++) {
+            if (probabilidades[i] > valorMayor) {
+                valorMayor = probabilidades[i];
+                pos = i;
+            }
+        }
+        return "Predicción: " + etiquetas[pos] + ", Probabilidad: " +
+                (new DecimalFormat("0.00").format(probabilidades[pos] * 100)) + "%";
+    }
+
+    public void PersonalizedModel(View v){
+        try {
+            String[] etiquetas = {"Morales", "Reyes", "Alvarez", "Vera", "Navas", "Triana"};
+            Roostros model = Roostros.newInstance(getApplicationContext());
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+            inputFeature0.loadBuffer(convertirImagenATensorBuffer(mSelectedImage));
+            Roostros.Outputs outputs = model.process(inputFeature0);
+            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+            txtResults.setText(obtenerEtiquetayProbabilidad(etiquetas, outputFeature0.getFloatArray()));
+            model.close();
+        } catch (Exception e) {
+            txtResults.setText(e.getMessage());
+        }
     }
 }
