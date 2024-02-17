@@ -1,0 +1,6 @@
+![1708115487562](https://github.com/lreyesp2609/VisionApi/assets/159501474/b037075b-8949-4514-9427-f3dbdb4c5988)
+![1708115487548](https://github.com/lreyesp2609/VisionApi/assets/159501474/b338ff04-4edb-4130-9550-97ad0f1e9c6b)
+![1708115487534](https://github.com/lreyesp2609/VisionApi/assets/159501474/4d660988-d6c2-48e4-871d-30094dd4639c)
+![1708115487575](https://github.com/lreyesp2609/VisionApi/assets/159501474/571d6fd2-a02c-4346-bcfe-df8ee78abd11)
+![1708115487521](https://github.com/lreyesp2609/VisionApi/assets/159501474/5bc90498-c1d7-4a4c-9886-29c577ed60d7)
+![1708115487505](https://github.com/lreyesp2609/VisionApi/assets/159501474/ba57b762-825d-4fb2-a07b-0416fdfc96d4)
